@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS — Premium Computing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&display=swap" rel="stylesheet">
+<style>
+  /* ─── CONFIG: paste your JSONBin Master Key & Bin ID here ─── */
+  /* (also update in the <script> section at the bottom)        */
+
+  :root {
+    --bg: #080a0f;
+    --surface: #0e1117;
+    --surface2: #161b25;
+    --border: #1e2535;
+    --accent: #00d4ff;
+    --accent2: #ff3e6c;
+    --text: #e8eaf0;
+    --muted: #6b7591;
+    --card-glow: 0 0 40px rgba(0,212,255,0.08);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 48px;
+    height: 64px;
+    background: rgba(8,10,15,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 4px;
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .nav-logo span { color: var(--text); }
+
+  .nav-right {
+    display: flex; align-items: center; gap: 32px;
+  }
+
+  .nav-link {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: color .2s;
+  }
+  .nav-link:hover { color: var(--text); }
+
+  .cart-btn {
+    position: relative;
+    background: none; border: 1px solid var(--border);
+    color: var(--text); cursor: pointer;
+    padding: 8px 20px;
+    border-radius: 4px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: border-color .2s, color .2s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .cart-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .cart-count {
+    background: var(--accent2);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    display: none;
+  }
+  .cart-count.visible { display: flex; }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex; align-items: center;
+    padding: 120px 48px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-grid-bg {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 70% at 60% 50%, black 0%, transparent 100%);
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,212,255,0.12) 0%, transparent 70%);
+    right: -100px; top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  .hero-content { max-width: 680px; position: relative; z-index: 1; }
+
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-size: 11px; font-weight: 500; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: 24px;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    width: 32px; height: 1px;
+    background: var(--accent);
+  }
+
+  .hero h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(64px, 10vw, 120px);
+    line-height: 0.92;
+    letter-spacing: 2px;
+    margin-bottom: 28px;
+  }
+
+  .hero h1 .accent { color: var(--accent); }
+  .hero h1 .stroke {
+    -webkit-text-stroke: 1px rgba(232,234,240,0.3);
+    color: transparent;
+  }
+
+  .hero-sub {
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--muted);
+    max-width: 480px;
+    margin-bottom: 44px;
+  }
+
+  .hero-actions { display: flex; align-items: center; gap: 16px; }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--bg);
+    border: none; cursor: pointer;
+    padding: 14px 32px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-radius: 3px;
+    transition: opacity .2s, transform .15s;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-primary:hover { opacity: 0.85; transform: translateY(-1px); }
+
+  .btn-ghost {
+    background: none;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    padding: 14px 32px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-radius: 3px;
+    transition: all .2s;
+    text-decoration: none;
+    display: inline-block;
+  }
+  .btn-ghost:hover { border-color: var(--text); color: var(--text); }
+
+  /* ── STATS BAR ── */
+  .stats-bar {
+    display: flex; align-items: center; gap: 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    overflow: hidden;
+  }
+
+  .stat-item {
+    flex: 1;
+    padding: 24px 32px;
+    border-right: 1px solid var(--border);
+    text-align: center;
+  }
+  .stat-item:last-child { border-right: none; }
+
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    display: block;
+  }
+  .stat-label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* ── PRODUCTS ── */
+  .products-section {
+    padding: 96px 48px;
+  }
+
+  .section-header {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    margin-bottom: 48px;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px;
+    letter-spacing: 3px;
+    line-height: 1;
+  }
+
+  .section-title span { color: var(--accent); }
+
+  /* Filters */
+  .filter-bar {
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .filter-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 8px 16px;
+    border-radius: 2px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+  }
+
+  /* Search */
+  .search-bar {
+    width: 100%;
+    margin-bottom: 32px;
+    position: relative;
+  }
+
+  .search-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 14px 20px 14px 48px;
+    border-radius: 4px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    transition: border-color .2s;
+    outline: none;
+  }
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--muted); }
+
+  .search-icon {
+    position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 16px;
+  }
+
+  /* Product Grid */
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .product-card {
+    background: var(--surface);
+    padding: 32px;
+    position: relative;
+    transition: background .2s;
+    cursor: pointer;
+    display: flex; flex-direction: column;
+  }
+  .product-card:hover { background: var(--surface2); }
+
+  .product-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid transparent;
+    border-radius: inherit;
+    transition: border-color .2s;
+    pointer-events: none;
+  }
+  .product-card:hover::after { border-color: var(--accent); }
+
+  .product-badge {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 2px;
+    margin-bottom: 20px;
+    background: rgba(0,212,255,0.12);
+    color: var(--accent);
+    border: 1px solid rgba(0,212,255,0.2);
+    width: fit-content;
+  }
+
+  .product-badge.hot {
+    background: rgba(255,62,108,0.12);
+    color: var(--accent2);
+    border-color: rgba(255,62,108,0.2);
+  }
+
+  .product-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-bottom: 24px;
+    background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 64px;
+    overflow: hidden;
+  }
+
+  .product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+
+  .product-name {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  .product-desc {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--muted);
+    margin-bottom: 20px;
+    flex: 1;
+  }
+
+  .product-specs {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-bottom: 24px;
+  }
+
+  .spec-tag {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.04);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  .product-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .product-price {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 2px;
+    color: var(--text);
+  }
+  .product-price .cents {
+    font-size: 16px;
+    color: var(--muted);
+  }
+
+  .add-to-cart {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 18px;
+    border-radius: 3px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .add-to-cart:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+  }
+  .add-to-cart.added {
+    background: rgba(0,212,255,0.1);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* Empty state */
+  .empty-state {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 96px 32px;
+    background: var(--surface);
+  }
+  .empty-icon { font-size: 56px; margin-bottom: 16px; }
+  .empty-title { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 3px; color: var(--muted); }
+  .empty-sub { color: var(--muted); font-size: 14px; margin-top: 8px; }
+
+  /* Loading */
+  .loading-state {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 96px 32px;
+    background: var(--surface);
+  }
+  .spinner {
+    width: 40px; height: 40px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    margin: 0 auto 16px;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── CART DRAWER ── */
+  .cart-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    opacity: 0; pointer-events: none;
+    transition: opacity .3s;
+  }
+  .cart-overlay.open { opacity: 1; pointer-events: all; }
+
+  .cart-drawer {
+    position: fixed; top: 0; right: -480px; bottom: 0;
+    width: 480px;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    z-index: 201;
+    display: flex; flex-direction: column;
+    transition: right .35s cubic-bezier(.4,0,.2,1);
+  }
+  .cart-drawer.open { right: 0; }
+
+  .cart-header {
+    padding: 28px 32px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .cart-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 3px;
+  }
+
+  .close-btn {
+    background: none; border: 1px solid var(--border);
+    color: var(--muted);
+    width: 36px; height: 36px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all .2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .close-btn:hover { border-color: var(--text); color: var(--text); }
+
+  .cart-items { flex: 1; overflow-y: auto; padding: 24px 32px; }
+
+  .cart-item {
+    display: flex; align-items: flex-start; gap: 16px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .cart-item:last-child { border-bottom: none; }
+
+  .cart-item-img {
+    width: 72px; height: 72px;
+    border-radius: 4px;
+    background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .cart-item-img img { width: 100%; height: 100%; object-fit: cover; }
+
+  .cart-item-info { flex: 1; }
+
+  .cart-item-name {
+    font-size: 14px; font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .cart-item-price {
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .qty-control {
+    display: flex; align-items: center; gap: 12px;
+  }
+
+  .qty-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 28px; height: 28px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color .2s;
+  }
+  .qty-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .qty-num { font-size: 14px; font-weight: 600; min-width: 20px; text-align: center; }
+
+  .remove-item {
+    background: none; border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 18px;
+    transition: color .2s;
+    padding: 4px;
+  }
+  .remove-item:hover { color: var(--accent2); }
+
+  .cart-footer {
+    padding: 24px 32px;
+    border-top: 1px solid var(--border);
+  }
+
+  .cart-total-row {
+    display: flex; justify-content: space-between;
+    margin-bottom: 8px; font-size: 14px;
+  }
+  .cart-total-row.grand {
+    font-size: 18px; font-weight: 700;
+    margin: 16px 0 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .cart-total-row.grand .total-amount {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 2px;
+    color: var(--accent);
+  }
+
+  .checkout-btn {
+    width: 100%;
+    background: var(--accent);
+    color: var(--bg);
+    border: none; cursor: pointer;
+    padding: 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    border-radius: 3px;
+    transition: opacity .2s;
+  }
+  .checkout-btn:hover { opacity: 0.85; }
+
+  .cart-empty {
+    text-align: center;
+    padding: 64px 0;
+    color: var(--muted);
+  }
+  .cart-empty-icon { font-size: 48px; margin-bottom: 16px; }
+  .cart-empty-text { font-size: 14px; }
+
+  /* ── CHECKOUT MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(8px);
+    z-index: 300;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    opacity: 0; pointer-events: none;
+    transition: opacity .3s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: 100%; max-width: 520px;
+    padding: 40px;
+    transform: translateY(20px);
+    transition: transform .3s;
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+
+  .modal-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px; letter-spacing: 3px;
+    margin-bottom: 32px;
+  }
+
+  .form-group { margin-bottom: 20px; }
+
+  .form-label {
+    display: block;
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .form-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 12px 16px;
+    border-radius: 4px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .form-input:focus { border-color: var(--accent); }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  .modal-actions { display: flex; gap: 12px; margin-top: 32px; }
+
+  /* ── SUCCESS ── */
+  .success-modal {
+    text-align: center;
+    padding: 20px 0;
+  }
+  .success-icon {
+    font-size: 64px; margin-bottom: 20px;
+    animation: pop .4s cubic-bezier(.17,.67,.23,1.59);
+  }
+  @keyframes pop {
+    from { transform: scale(0); }
+    to { transform: scale(1); }
+  }
+  .success-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 40px; letter-spacing: 3px;
+    margin-bottom: 12px;
+    color: var(--accent);
+  }
+  .success-sub { color: var(--muted); font-size: 15px; line-height: 1.6; }
+
+  /* ── TOAST ── */
+  .toast-container {
+    position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
+    z-index: 400;
+    display: flex; flex-direction: column; gap: 8px; align-items: center;
+  }
+
+  .toast {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 12px 24px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    animation: slideUp .3s ease forwards;
+    white-space: nowrap;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 48px;
+    display: flex; align-items: center; justify-content: space-between;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .footer-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px; letter-spacing: 4px;
+    color: var(--muted);
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--surface); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    nav { padding: 0 20px; }
+    .hero { padding: 100px 20px 60px; }
+    .stats-bar { flex-wrap: wrap; }
+    .stat-item { flex: 1 1 50%; }
+    .products-section { padding: 60px 20px; }
+    .section-header { flex-direction: column; align-items: flex-start; gap: 20px; }
+    .cart-drawer { width: 100%; right: -100%; }
+    footer { flex-direction: column; gap: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">NEX<span>US</span></a>
+  <div class="nav-right">
+    <a href="#products" class="nav-link">Shop</a>
+    <a href="#about" class="nav-link">About</a>
+    <button class="cart-btn" onclick="toggleCart()">
+      🛒 Cart
+      <span class="cart-count" id="cartCount">0</span>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Premium Computing Hardware</div>
+    <h1>
+      BUILD YOUR<br>
+      <span class="accent">DREAM</span><br>
+      <span class="stroke">MACHINE</span>
+    </h1>
+    <p class="hero-sub">
+      Cutting-edge computers engineered for creators, gamers, and professionals who refuse to compromise on performance.
+    </p>
+    <div class="hero-actions">
+      <a href="#products" class="btn-primary">Shop Now</a>
+      <a href="#about" class="btn-ghost">Learn More</a>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar">
+  <div class="stat-item">
+    <span class="stat-num">2YR</span>
+    <div class="stat-label">Warranty</div>
+  </div>
+  <div class="stat-item">
+    <span class="stat-num">48H</span>
+    <div class="stat-label">Fast Shipping</div>
+  </div>
+  <div class="stat-item">
+    <span class="stat-num">24/7</span>
+    <div class="stat-label">Support</div>
+  </div>
+  <div class="stat-item">
+    <span class="stat-num">100%</span>
+    <div class="stat-label">Satisfaction</div>
+  </div>
+</div>
+
+<!-- PRODUCTS -->
+<section class="products-section" id="products">
+  <div class="section-header">
+    <div class="section-title">ALL <span>SYSTEMS</span></div>
+    <div class="filter-bar" id="filterBar">
+      <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+    </div>
+  </div>
+
+  <div class="search-bar">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" type="text" placeholder="Search computers..." id="searchInput" oninput="filterProducts()">
+  </div>
+
+  <div class="product-grid" id="productGrid">
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <div style="color:var(--muted);font-size:14px;letter-spacing:2px;text-transform:uppercase;">Loading Systems...</div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about" style="padding: 96px 48px; background: var(--surface); border-top: 1px solid var(--border);">
+  <div style="max-width: 600px;">
+    <div class="hero-eyebrow">Our Mission</div>
+    <h2 style="font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:3px;margin-bottom:24px;">
+      BUILT FOR <span style="color:var(--accent)">PERFORMANCE</span>
+    </h2>
+    <p style="color:var(--muted);font-size:16px;line-height:1.8;">
+      At NEXUS, we handpick only the finest components and assemble every system with obsessive attention to detail.
+      Every machine is stress-tested before it reaches your desk.
+    </p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">NEXUS</div>
+  <div>© 2025 NEXUS Computing. All rights reserved.</div>
+  <div style="display:flex;gap:24px;">
+    <a href="#" style="color:var(--muted);text-decoration:none;font-size:12px;letter-spacing:1px;text-transform:uppercase;">Privacy</a>
+    <a href="#" style="color:var(--muted);text-decoration:none;font-size:12px;letter-spacing:1px;text-transform:uppercase;">Terms</a>
+  </div>
+</footer>
+
+<!-- CART DRAWER -->
+<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+<div class="cart-drawer" id="cartDrawer">
+  <div class="cart-header">
+    <div class="cart-title">YOUR CART</div>
+    <button class="close-btn" onclick="toggleCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-footer" id="cartFooter" style="display:none;">
+    <div class="cart-total-row"><span>Subtotal</span><span id="cartSubtotal">$0</span></div>
+    <div class="cart-total-row"><span>Shipping</span><span style="color:var(--accent)">Free</span></div>
+    <div class="cart-total-row grand">
+      <span>Total</span>
+      <span class="total-amount" id="cartTotal">$0</span>
+    </div>
+    <button class="checkout-btn" onclick="openCheckout()">Proceed to Checkout</button>
+  </div>
+</div>
+
+<!-- CHECKOUT MODAL -->
+<div class="modal-overlay" id="checkoutModal">
+  <div class="modal" id="checkoutModalContent">
+    <div class="modal-title">CHECKOUT</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">First Name</label>
+        <input class="form-input" type="text" id="firstName" placeholder="John">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Last Name</label>
+        <input class="form-input" type="text" id="lastName" placeholder="Doe">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input class="form-input" type="email" id="email" placeholder="john@example.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Shipping Address</label>
+      <input class="form-input" type="text" id="address" placeholder="123 Main St, City, State 12345">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Card Number</label>
+      <input class="form-input" type="text" id="card" placeholder="4242 4242 4242 4242" maxlength="19">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Expiry</label>
+        <input class="form-input" type="text" id="expiry" placeholder="MM/YY" maxlength="5">
+      </div>
+      <div class="form-group">
+        <label class="form-label">CVV</label>
+        <input class="form-input" type="text" id="cvv" placeholder="123" maxlength="3">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeCheckout()" style="flex:1;">Cancel</button>
+      <button class="btn-primary" onclick="placeOrder()" style="flex:2;border:none;cursor:pointer;">Place Order</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+  // ═══════════════════════════════════════════════════════
+  //  ⚙️  CONFIGURATION — Edit these values!
+  //
+  //  1. Go to https://jsonbin.io and create a FREE account
+  //  2. Create a new Bin (start with: {"products":[]} )
+  //  3. Copy your Bin ID and Master Key below
+  //  4. Use the SAME values in admin/index.html
+  // ═══════════════════════════════════════════════════════
+  const JSONBIN_BIN_ID  = 'YOUR_BIN_ID_HERE';
+  const JSONBIN_API_KEY = 'YOUR_MASTER_KEY_HERE';
+  // ═══════════════════════════════════════════════════════
+
+  let products = [];
+  let cart = JSON.parse(localStorage.getItem('nexus_cart') || '[]');
+  let activeFilter = 'all';
+
+  // ── DEMO PRODUCTS (shown when JSONBin is not configured) ──
+  const DEMO_PRODUCTS = [
+    {
+      id: 'demo-1',
+      name: 'NEXUS Titan Pro',
+      category: 'Desktop',
+      price: 2499,
+      description: 'Ultimate workstation with RTX 4090, Intel i9-14900K, 64GB DDR5 RAM. Built for creators.',
+      specs: ['RTX 4090', 'i9-14900K', '64GB DDR5', '4TB NVMe'],
+      image: '',
+      badge: 'Best Seller',
+      badgeType: 'hot'
+    },
+    {
+      id: 'demo-2',
+      name: 'NEXUS Phantom',
+      category: 'Gaming',
+      price: 1799,
+      description: 'Compact gaming powerhouse. Liquid-cooled AMD Ryzen 9, RX 7900 XT, 32GB DDR5.',
+      specs: ['RX 7900 XT', 'Ryzen 9 7950X', '32GB DDR5', '2TB NVMe'],
+      image: '',
+      badge: 'New',
+      badgeType: ''
+    },
+    {
+      id: 'demo-3',
+      name: 'NEXUS Blade 15',
+      category: 'Laptop',
+      price: 1299,
+      description: 'Ultra-thin powerhouse laptop. RTX 4070, Intel i7, 1.8kg chassis for professionals on the move.',
+      specs: ['RTX 4070', 'i7-14700H', '32GB DDR5', '1TB NVMe'],
+      image: '',
+      badge: 'Popular',
+      badgeType: ''
+    },
+    {
+      id: 'demo-4',
+      name: 'NEXUS Studio',
+      category: 'Workstation',
+      price: 3999,
+      description: 'Dual GPU creative workstation. Designed for 3D rendering, video production and AI workflows.',
+      specs: ['2x RTX 4080', 'Threadripper', '128GB ECC', '8TB RAID'],
+      image: '',
+      badge: 'Pro',
+      badgeType: ''
+    },
+    {
+      id: 'demo-5',
+      name: 'NEXUS Core',
+      category: 'Desktop',
+      price: 899,
+      description: 'Powerful everyday desktop. Great for school, work, and light gaming. Compact and quiet.',
+      specs: ['RX 7600', 'Ryzen 5 7600X', '16GB DDR5', '512GB NVMe'],
+      image: '',
+      badge: '',
+      badgeType: ''
+    },
+    {
+      id: 'demo-6',
+      name: 'NEXUS Mini',
+      category: 'Mini PC',
+      price: 599,
+      description: 'Palm-sized powerhouse. Fits anywhere, performs everywhere. Perfect for office and living rooms.',
+      specs: ['Intel Arc', 'i5-13500H', '16GB DDR5', '512GB NVMe'],
+      image: '',
+      badge: 'Compact',
+      badgeType: ''
+    }
+  ];
+
+  const EMOJI_MAP = {
+    'Desktop': '🖥️', 'Gaming': '🎮', 'Laptop': '💻',
+    'Workstation': '⚡', 'Mini PC': '📦', 'default': '💾'
+  };
+
+  // ── LOAD PRODUCTS ──
+  async function loadProducts() {
+    if (JSONBIN_BIN_ID === 'YOUR_BIN_ID_HERE') {
+      products = DEMO_PRODUCTS;
+      renderProducts();
+      return;
+    }
+    try {
+      const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+        headers: { 'X-Master-Key': JSONBIN_API_KEY }
+      });
+      const data = await res.json();
+      products = data.record.products || [];
+      if (products.length === 0) {
+        products = DEMO_PRODUCTS;
+        showToast('Showing demo products — add your own in the admin panel!');
+      }
+    } catch(e) {
+      products = DEMO_PRODUCTS;
+    }
+    renderProducts();
+  }
+
+  // ── RENDER ──
+  function renderProducts() {
+    const grid = document.getElementById('productGrid');
+    const search = document.getElementById('searchInput').value.toLowerCase();
+
+    let filtered = products.filter(p => {
+      const matchCat = activeFilter === 'all' || p.category === activeFilter;
+      const matchSearch = !search || p.name.toLowerCase().includes(search) || p.description?.toLowerCase().includes(search);
+      return matchCat && matchSearch;
+    });
+
+    // Build filter buttons
+    const cats = [...new Set(products.map(p => p.category).filter(Boolean))];
+    const filterBar = document.getElementById('filterBar');
+    filterBar.innerHTML = `<button class="filter-btn ${activeFilter==='all'?'active':''}" onclick="setFilter('all',this)">All</button>`;
+    cats.forEach(c => {
+      filterBar.innerHTML += `<button class="filter-btn ${activeFilter===c?'active':''}" onclick="setFilter('${c}',this)">${c}</button>`;
+    });
+
+    if (filtered.length === 0) {
+      grid.innerHTML = `<div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <div class="empty-title">No Systems Found</div>
+        <div class="empty-sub">Try a different filter or search term</div>
+      </div>`;
+      return;
+    }
+
+    grid.innerHTML = filtered.map(p => {
+      const emoji = EMOJI_MAP[p.category] || EMOJI_MAP.default;
+      const inCart = cart.find(i => i.id === p.id);
+      const imgContent = p.image
+        ? `<img src="${p.image}" alt="${p.name}" onerror="this.parentElement.innerHTML='${emoji}'">`
+        : emoji;
+      const specs = (p.specs || []).map(s => `<span class="spec-tag">${s}</span>`).join('');
+      const badge = p.badge ? `<div class="product-badge ${p.badgeType||''}">${p.badge}</div>` : '';
+      return `
+        <div class="product-card">
+          ${badge}
+          <div class="product-image">${imgContent}</div>
+          <div class="product-name">${p.name}</div>
+          <div class="product-desc">${p.description||''}</div>
+          <div class="product-specs">${specs}</div>
+          <div class="product-footer">
+            <div class="product-price">$${Number(p.price).toLocaleString()}</div>
+            <button class="add-to-cart ${inCart?'added':''}" onclick="addToCart('${p.id}', this)">
+              ${inCart ? '✓ Added' : '+ Cart'}
+            </button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function setFilter(cat, btn) {
+    activeFilter = cat;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderProducts();
+  }
+
+  function filterProducts() { renderProducts(); }
+
+  // ── CART ──
+  function addToCart(id, btn) {
+    const product = products.find(p => p.id === id);
+    if (!product) return;
+    const existing = cart.find(i => i.id === id);
+    if (existing) {
+      existing.qty++;
+    } else {
+      cart.push({ ...product, qty: 1 });
+    }
+    saveCart();
+    updateCartCount();
+    renderCartItems();
+    btn.classList.add('added');
+    btn.textContent = '✓ Added';
+    showToast(`${product.name} added to cart`);
+  }
+
+  function saveCart() {
+    localStorage.setItem('nexus_cart', JSON.stringify(cart));
+  }
+
+  function updateCartCount() {
+    const total = cart.reduce((s, i) => s + i.qty, 0);
+    const el = document.getElementById('cartCount');
+    el.textContent = total;
+    el.classList.toggle('visible', total > 0);
+  }
+
+  function toggleCart() {
+    document.getElementById('cartDrawer').classList.toggle('open');
+    document.getElementById('cartOverlay').classList.toggle('open');
+    renderCartItems();
+  }
+
+  function renderCartItems() {
+    const el = document.getElementById('cartItems');
+    const footer = document.getElementById('cartFooter');
+    if (cart.length === 0) {
+      el.innerHTML = `<div class="cart-empty"><div class="cart-empty-icon">🛒</div><div class="cart-empty-text">Your cart is empty</div></div>`;
+      footer.style.display = 'none';
+      return;
+    }
+    const emoji = EMOJI_MAP;
+    el.innerHTML = cart.map(item => {
+      const em = emoji[item.category] || emoji.default;
+      const imgContent = item.image
+        ? `<img src="${item.image}" alt="${item.name}">`
+        : em;
+      return `
+        <div class="cart-item">
+          <div class="cart-item-img">${imgContent}</div>
+          <div class="cart-item-info">
+            <div class="cart-item-name">${item.name}</div>
+            <div class="cart-item-price">$${(item.price * item.qty).toLocaleString()}</div>
+            <div class="qty-control">
+              <button class="qty-btn" onclick="changeQty('${item.id}',-1)">−</button>
+              <span class="qty-num">${item.qty}</span>
+              <button class="qty-btn" onclick="changeQty('${item.id}',1)">+</button>
+            </div>
+          </div>
+          <button class="remove-item" onclick="removeItem('${item.id}')">✕</button>
+        </div>`;
+    }).join('');
+    const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+    document.getElementById('cartSubtotal').textContent = `$${subtotal.toLocaleString()}`;
+    document.getElementById('cartTotal').textContent = `$${subtotal.toLocaleString()}`;
+    footer.style.display = 'block';
+  }
+
+  function changeQty(id, delta) {
+    const item = cart.find(i => i.id === id);
+    if (!item) return;
+    item.qty += delta;
+    if (item.qty <= 0) {
+      cart = cart.filter(i => i.id !== id);
+    }
+    saveCart();
+    updateCartCount();
+    renderCartItems();
+    renderProducts();
+  }
+
+  function removeItem(id) {
+    cart = cart.filter(i => i.id !== id);
+    saveCart();
+    updateCartCount();
+    renderCartItems();
+    renderProducts();
+  }
+
+  // ── CHECKOUT ──
+  function openCheckout() {
+    document.getElementById('checkoutModal').classList.add('open');
+    document.getElementById('cartDrawer').classList.remove('open');
+    document.getElementById('cartOverlay').classList.remove('open');
+  }
+
+  function closeCheckout() {
+    document.getElementById('checkoutModal').classList.remove('open');
+  }
+
+  function placeOrder() {
+    const fields = ['firstName','lastName','email','address','card','expiry','cvv'];
+    for (const f of fields) {
+      if (!document.getElementById(f).value.trim()) {
+        showToast('Please fill in all fields');
+        return;
+      }
+    }
+    // Show success
+    document.getElementById('checkoutModalContent').innerHTML = `
+      <div class="success-modal">
+        <div class="success-icon">✅</div>
+        <div class="success-title">ORDER PLACED!</div>
+        <div class="success-sub">
+          Your order has been confirmed.<br>
+          You'll receive a confirmation email shortly.<br><br>
+          <strong style="color:var(--accent)">Estimated delivery: 48 hours</strong>
+        </div>
+        <br><br>
+        <button class="btn-primary" onclick="closeCheckout();clearCart();" style="border:none;cursor:pointer;">Done</button>
+      </div>`;
+  }
+
+  function clearCart() {
+    cart = [];
+    saveCart();
+    updateCartCount();
+  }
+
+  // ── TOAST ──
+  function showToast(msg) {
+    const container = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = msg;
+    container.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+  }
+
+  // ── INIT ──
+  updateCartCount();
+  loadProducts();
+
+  // Card number formatting
+  document.getElementById('card')?.addEventListener('input', function(e) {
+    let v = e.target.value.replace(/\D/g,'').substring(0,16);
+    e.target.value = v.replace(/(.{4})/g,'$1 ').trim();
+  });
+
+  document.getElementById('expiry')?.addEventListener('input', function(e) {
+    let v = e.target.value.replace(/\D/g,'');
+    if(v.length>=2) v = v.substring(0,2)+'/'+v.substring(2);
+    e.target.value = v;
+  });
+</script>
+</body>
+</html>
